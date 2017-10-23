@@ -1,39 +1,25 @@
-const axios = require('axios'); // HTTP client
-const cheerio = require('cheerio'); // HTML parsing package
-const jsonframe = require('jsonframe-cheerio'); // a cheerio plugin I designed
-const fs = require('fs'); // is included in node.js - you don't need to install it
+const cheerio = require('cheerio');
+const jsonframe = require('jsonframe-cheerio');
 
-axios.get('https://www.producthunt.com')
-    .then((response) => {
+const $ = cheerio.load('our html page url here');
+jsonframe($); // initializes the plugin
 
-        if (response.status === 200) {
+var frame = {
+	"crypto": {           // setting the parent item as "companies"
+		"selector": "#currencies > tbody > tr",    // defines the elements to search for
+		"data": [{              // "data": [{}] defines a list of items
+			"logo": ".s-s-bitcoin",          // inline selector defining "name" so "company"."name"
+			"name": "td > a", // inline selector defining "description" as "company"."description"
+			"url": {                                    // defining "url" by an attribute with "attr" and "selector" in an object
+				"selector": "td > a",      // is actually the same as the inline selector
+				"attr": "href"                              // the attribute name to retrieve
+			},
+			"marketcap": "td:nth-child(3)", // inline selector defining "description" as "company"."description"
+			"price": "td:nth-child(4) > a:nth-child(1)", // inline selector defining "description" as "company"."description"
+		}]
+	}
 
-            var html = response.data;
-            let $ = cheerio.load(html); // We load the html we received into cheerio's parser
-            jsonframe($); // We add the plugin to the cheerio's parser
+};
 
-            fs.writeFileSync('ph.html', html); // This saves the html to a ph.html for checks
-
-            var productsFrame = { // This is a simple conversation of the data structure
-                "products": { // thanks to jsonframe
-                    "selector": "ul.postsList_3n2Ck li",
-                    "data": [{
-                        "name": ".content_3Qj0y .title_24w6f",
-                        "description": ".content_3Qj0y .subtle_fyrho",
-                        "image": {
-                            "selector": "img",
-                            "attr": "src"
-                        },
-                        "upvotes": "[data-test=vote-button] .buttonContainer_1ROJn",
-                        "comments": "[data-test=vote-button] + a .buttonContainer_1ROJn"
-                    }]
-                }
-            };
-
-            var products = $('body').scrape(productsFrame); // Scrape the list of products based on the json frame we defined before
-            fs.writeFileSync("products.json", JSON.stringify(products, null, 2)); // You can see that the output json is structured the way we wanted it thanks to the json frame
-        }
-
-    }, (error) => {
-        console.log("Humm: ", error);
-    });
+let companiesList = $('.list.items').scrape(frame);
+console.log(companiesList); // Output the data in the terminal
