@@ -3,7 +3,7 @@ const jsonframe = require('jsonframe-cheerio');
 
 const $ = cheerio.load('our html page url here');
 jsonframe($); // initializes the plugin
-
+ 
 var frame = {
 	"crypto": {           // setting the parent item as "companies"
 		"selector": "#currencies > tbody > tr",    // defines the elements to search for
