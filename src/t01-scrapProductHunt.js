@@ -1,25 +1,30 @@
 const cheerio = require('cheerio');
 const jsonframe = require('jsonframe-cheerio');
 
-const $ = cheerio.load('our html page url here');
+const $ = cheerio.load('https://coinmarketcap.com/all/views/all/');
 jsonframe($); // initializes the plugin
  
-var frame = {
-	"crypto": {           // setting the parent item as "companies"
-		"selector": "#currencies > tbody > tr",    // defines the elements to search for
-		"data": [{              // "data": [{}] defines a list of items
-			"logo": ".s-s-bitcoin",          // inline selector defining "name" so "company"."name"
-			"name": "td > a", // inline selector defining "description" as "company"."description"
-			"url": {                                    // defining "url" by an attribute with "attr" and "selector" in an object
-				"selector": "td > a",      // is actually the same as the inline selector
+//exception handling 
+process.on('uncaughtException', err =>
+  console.error('uncaught exception: ', err))
+process.on('unhandledRejection', (reason, p) =>
+  console.error('unhandled rejection: ', reason, p))
+
+const frame = {
+	"crypto": {         
+		"selector": "tbody > tr",   
+		"data": [{             
+			"name": "td:nth-child(2) > a:nth-child(3)", 
+			"url": {                                  
+				"selector": "td:nth-child(2) > a:nth-child(3)",    
 				"attr": "href"                              // the attribute name to retrieve
 			},
-			"marketcap": "td:nth-child(3)", // inline selector defining "description" as "company"."description"
-			"price": "td:nth-child(4) > a:nth-child(1)", // inline selector defining "description" as "company"."description"
+			"marketcap": "tr > td:nth-child(4)",
+			"price": "tr > td:nth-child(5) > a:nth-child(1)", 
 		}]
 	}
 
 };
 
-let companiesList = $('.list.items').scrape(frame);
-console.log(companiesList); // Output the data in the terminal
+let companiesList = $('tbody').scrape(frame);
+console.log(companiesList); 
